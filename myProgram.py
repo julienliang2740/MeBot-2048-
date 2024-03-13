@@ -59,7 +59,23 @@ def mergeSingleLine(numLine):
     #print(mergedline)
     #print("---")
     return mergedline
-               
+
+def maxMerge(ogGrid, newGrid):
+    ogListing = []
+    newListing = []
+    for row in ogGrid:
+        for num in row:
+            ogListing.append(num)
+    for row in newGrid:
+        for num in row:
+            newListing.append(num)
+    ogListing.sort(reverse=True)
+    newListing.sort(reverse=True)
+
+    for i in range(0,len(ogListing)):
+        if ogListing[i] < newListing[i]:
+            return newListing[i] 
+    return 0
 
 def up(theGrid):
     newGrid = clone_grid(theGrid)
@@ -96,8 +112,10 @@ def right(theGrid):
             newGrid[j][i] = aLineMerged[j]
     return newGrid
 
+# Algos return: {"up", "down", "left", "right", "joever"}    
+
 # Priority: down, left, right, up
-def AlgoOne(theGrid): #returns: {"up", "down", "left", "right", joever}    
+def AlgoOne(theGrid): 
     if theGrid != down(theGrid):
         return "down"
     elif theGrid != left(theGrid):
@@ -109,6 +127,42 @@ def AlgoOne(theGrid): #returns: {"up", "down", "left", "right", joever}
     else:
         return "joever"
 
+#Priority: max merge, down, left, right, up
+def AlgoTwo(theGrid):
+    upGrid = up(theGrid)
+    downGrid = down(theGrid)
+    leftGrid = left(theGrid)
+    rightGrid = right(theGrid)
+
+    if theGrid == upGrid and theGrid == downGrid and theGrid == leftGrid and theGrid == rightGrid:
+        return "joever"
+    
+    upGridMax = maxMerge(theGrid, upGrid)
+    downGridMax = maxMerge(theGrid, downGrid)
+    leftGridMax = maxMerge(theGrid, leftGrid)
+    rightGridMax = maxMerge(theGrid, rightGrid)
+
+    maxMergeNum = max([upGridMax,downGridMax,leftGridMax,rightGridMax])
+    
+    if maxMergeNum != 0:
+        if downGridMax == maxMergeNum:
+            return "down"
+        elif leftGridMax == maxMergeNum:
+            return "left"
+        elif rightGridMax == maxMergeNum:
+            return "right"
+        elif upGridMax == maxMergeNum:
+            return "up"
+    else:
+        if theGrid != down(theGrid):
+            return "down"
+        elif theGrid != left(theGrid):
+            return "left"
+        elif theGrid != right(theGrid):
+            return "right"
+        elif theGrid != up(theGrid):
+            return "up"
+    
 ####################################################################################################
 ####################################################################################################
 ####################################################################################################
@@ -136,7 +190,7 @@ if __name__ == "__main__":
         theTable = getTable(driver)
         print("The table: ")
         print(theTable)
-        command = AlgoOne(theTable)
+        command = AlgoTwo(theTable)
         print("THE COMMAND:")
         print(command)
 
