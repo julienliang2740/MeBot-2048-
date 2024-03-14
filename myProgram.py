@@ -100,7 +100,6 @@ def left(theGrid):
             newGrid[j][i] = aLineMerged[j]
     return newGrid
 
-
 def right(theGrid):
     newGrid = clone_grid(theGrid)
     for i in range(0,linesize):
@@ -111,6 +110,22 @@ def right(theGrid):
         for j in range(0,linesize):
             newGrid[j][i] = aLineMerged[j]
     return newGrid
+
+def moveInDirection(direction, theGrid):
+    newGrid = clone_grid(theGrid)
+    if direction == "up":
+        newGrid = up(theGrid)
+    elif direction == "down":
+        newGrid = down(theGrid)
+    elif direction == "left":
+        newGrid = left(theGrid)
+    elif direction == "right":
+        newGrid = right(theGrid)
+    return newGrid
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
 
 # Algos return: {"up", "down", "left", "right", "joever"}    
 
@@ -163,6 +178,45 @@ def AlgoTwo(theGrid):
         elif theGrid != up(theGrid):
             return "up"
     
+#(pretty much ignores blocks spawning in atm)
+def AlgoThree(theGrid): #literally same as algo 2 but looks two moves ahead
+    upGrid = up(theGrid)
+    downGrid = down(theGrid)
+    leftGrid = left(theGrid)
+    rightGrid = right(theGrid)
+
+    if theGrid == upGrid and theGrid == downGrid and theGrid == leftGrid and theGrid == rightGrid:
+        return "joever"
+
+    upGridMax = maxMerge(theGrid, upGrid)
+    downGridMax = maxMerge(theGrid, downGrid)
+    leftGridMax = maxMerge(theGrid, leftGrid)
+    rightGridMax = maxMerge(theGrid, rightGrid)
+
+
+    directionList = ["down","left","right","up"]
+    gridList = [[downGrid,"down"],[leftGrid,"left"],[rightGrid,"right"],[upGrid,"up"]] #[grid, directionString]
+    maxMergeList = [downGridMax,leftGridMax,rightGridMax,upGridMax]
+    for direction1 in directionList:
+        for direction2 in directionList:
+            addedGrid = moveInDirection(direction1, moveInDirection(direction2, theGrid))
+            gridList.append([addedGrid,direction1])
+    for gridpair in gridList:
+        maxMergeList.append(maxMerge(theGrid,gridpair[0]))
+    
+    max_index = maxMergeList.index(max(maxMergeList))
+
+    print(f"OUTPUT COMMAND: {gridList[max_index][1]}")
+
+    if (theGrid != moveInDirection(gridList[max_index][1], theGrid)):
+        return gridList[max_index][1]
+    else:
+        print("USING ALGO TWO")
+        print(f"current grid: {theGrid}")
+        print(f"suggested grid: {moveInDirection(gridList[max_index][1], theGrid)}")
+        return AlgoTwo(theGrid) 
+    
+
 ####################################################################################################
 ####################################################################################################
 ####################################################################################################
@@ -187,10 +241,11 @@ if __name__ == "__main__":
     actions = ActionChains(driver)
 
     while True:
+        print("-----BEGIN NEW MOVE-----")
         theTable = getTable(driver)
         print("The table: ")
         print(theTable)
-        command = AlgoTwo(theTable)
+        command = AlgoThree(theTable)
         print("THE COMMAND:")
         print(command)
 
